@@ -4,10 +4,10 @@ Leandro A. Scholz, Tessa Mancienne, Sarah J. Stednitz, Ethan K. Scott, Conrad C.
 bioRxiv DOI: [10.1101/2025.06.04.657938](https://doi.org/10.1101/2025.06.04.657938)\
 \
 Please refer to our repository for DeepLabCut and SLEAP pre-trained models:\
-**Scholz LA, Lee C, Stednitz S, Mancienne T, Scott E** (2025) *DLC and SLEAP pre-trained exported models.* The University of Melbourne. Software. DOI: [10.26188/29275838](https://doi.org/10.26188/29275838) 
+**Scholz LA, Lee CCY, Stednitz S, Mancienne T, Scott EK** (2025) *DLC and SLEAP pre-trained exported models.* The University of Melbourne. Software. DOI: [10.26188/29275838](https://doi.org/10.26188/29275838) 
 
 We also provide the annotated datasets used to train and compare the models, which can be downloaded from:\
-**Scholz LA, Mancienne T, Stednitz S, Scott E, Lee C** (2025) *Datasets of zebrafish larvae poses - annotated frames and videos.* Dataset. DOI: [10.26188/29276009.v1](https://doi.org/10.26188/29276009.v1) 
+**Scholz LA, Mancienne T, Stednitz S, Scott EK, Lee CCY** (2025) *Datasets of zebrafish larvae poses - annotated frames and videos.* Dataset. DOI: [10.26188/29276009.v1](https://doi.org/10.26188/29276009.v1) 
 
 # Instructions for MATLAB Implementation
 1. Generate directory and clone MATLAB analysis package to C:/toolbox/dlc_analysis
