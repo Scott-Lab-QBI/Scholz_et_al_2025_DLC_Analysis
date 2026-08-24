@@ -362,6 +362,7 @@ def get_all_metrics(dataframe,
                     pcutoff=0.8,
                     mask=None,
                     px_tolerances=(0,1000),
+                    return_fraction_lost=False,
                     **kwargs):
 
     """ Computes all point- and vector-based metrics from a dlc output dataframe
@@ -375,8 +376,12 @@ def get_all_metrics(dataframe,
             dlc dataframe. Has to have the same length as the dataframe (len(mask)==len(dataframe)).
             Defaults to None.
         px_tolerances (tuple, optional): _description_. Defaults to (0,1000).
+        return_fraction_lost (bool, optional): if True, also return the fraction of
+            point_metrics datapoints that fell below pcutoff (see get_body_center).
+            Only computed when bodyparts_dict['point_metrics'] has more than one
+            bodypart; otherwise np.nan. Defaults to False.
 
-    kwargs: 
+    kwargs:
         'point_movavg': window size (in frames) to compue smoothed coordinates using a
              moving average. 
         'vector_smooth': window size, in frames (vector_smooth > 3), with which to smooth the tail 
@@ -424,9 +429,10 @@ def get_all_metrics(dataframe,
         mask = np.full((N_TIME_PTS,), 1).astype(bool)
 
     if len(bodyparts_dict['point_metrics']) > 1:
-        mean_body_kpoint_df = get_body_center(dataframe[mask],
+        mean_body_kpoint_df, fraction_lost = get_body_center(dataframe[mask],
                                               bodyparts_dict['point_metrics'],
-                                              pcutoff=pcutoff)
+                                              pcutoff=pcutoff,
+                                              return_fraction_lost=True)
 
         dataframe = pd.concat([dataframe[mask], mean_body_kpoint_df], axis=1)
 
@@ -440,6 +446,13 @@ def get_all_metrics(dataframe,
                                              movavg=MOVAVG)
 
     if len(bodyparts_dict['point_metrics']) == 1:
+        # only used here to obtain fraction_lost with the same pcutoff-based
+        # logic used for the multi-bodypart case above; its centroid df is unused
+        _, fraction_lost = get_body_center(dataframe[mask],
+                                           bodyparts_dict['point_metrics'],
+                                           pcutoff=pcutoff,
+                                           return_fraction_lost=True)
+
         point_metrics_df = get_point_metrics(dataframe[mask],
                                              bodypart=bodyparts_dict['point_metrics'],
                                              mask=mask,
@@ -460,6 +473,8 @@ def get_all_metrics(dataframe,
     # Sort the column index to prevent PerformanceWarning and improve lookup speed
     all_metrics_df.sort_index(axis=1, inplace=True)
 
+    if return_fraction_lost:
+        return all_metrics_df, fraction_lost
     return all_metrics_df
 
 def bout_detector(

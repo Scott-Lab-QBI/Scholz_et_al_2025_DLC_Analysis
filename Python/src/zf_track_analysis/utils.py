@@ -71,25 +71,30 @@ def compute_derivative(values : np.ndarray,
 def get_body_center(dataframe : pd.DataFrame,
                     bodyparts : list,
                     new_name = 'mean_body_keypoint',
-                    pcutoff = 0.8):
+                    pcutoff = 0.8,
+                    return_fraction_lost = False):
 
-    """ Compute a new body keypoint (default named 'mean_body_keypoint') 
+    """ Compute a new body keypoint (default named 'mean_body_keypoint')
         from a DeepLabCut results dataframe and a list of bodyparts,
         by calculating the centroid from multiple keypoints of the original pose model.
 
     Args:
         dataframe (pd.DataFrame): DeepLabCut tracking result of a video from .h5 file
-        bodyparts (list): list of strings with bodyparts matching existing 
+        bodyparts (list): list of strings with bodyparts matching existing
             bodyparts in dataframe. eg.: ['swim_bladder', 'R_eye_top', 'L_eye_top']
         mask_likelihood (bool, optional): Choose whether or not to filter
             datapoints with likelihood lower than pcutoff. Defaults to False.
-        pcutoff (float, optional): likelihood cutoff to calculate centroid. 
-            This means, if the likelihood of that keypoint's prediction is lower than the pcutoff, 
+        pcutoff (float, optional): likelihood cutoff to calculate centroid.
+            This means, if the likelihood of that keypoint's prediction is lower than the pcutoff,
             that point will not be used to calculate the centroid. Defaults to 0.8.
+        return_fraction_lost (bool, optional): if True, also return the fraction of
+            datapoints (across all given bodyparts) that fell below pcutoff. Defaults to False.
 
     Returns:
         df (pandas.DataFrame): dataframe with the new keypoint data named
-        'mean_body_keypoint' calculated from the mean of bodyparts coordinates. 
+        'mean_body_keypoint' calculated from the mean of bodyparts coordinates.
+        fraction_lost (float): only returned if return_fraction_lost is True. np.nan if
+        pcutoff is None (no filtering was performed).
     """
 
     # merge columns from all bodyparts
@@ -100,10 +105,11 @@ def get_body_center(dataframe : pd.DataFrame,
 
     # exclude datapoints with likelihood less than pcutoff for computations
     # then interpolate the missing points
+    fraction_lost = np.nan
     if pcutoff is not None:
         mask = merged_likelihood < pcutoff
 
-        fraction_lost = np.sum(mask)/(5*dataframe.shape[0])
+        fraction_lost = np.sum(mask)/(len(bodyparts)*dataframe.shape[0])
         if fraction_lost > 0.1:
             print(f"    (get_body_center) fraction of points that do not pass pcutoff: {fraction_lost:.2f}")
         # Set low-confidence points to NaN to mark them as missing
@@ -137,6 +143,8 @@ def get_body_center(dataframe : pd.DataFrame,
     df = pd.DataFrame(columns=index,
                       data=np.hstack((mean_x, mean_y, mean_likelihood)))
 
+    if return_fraction_lost:
+        return df, fraction_lost
     return df
 
 def compute_base_and_heading(dataframe : pd.DataFrame,
